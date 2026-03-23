@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"> <!-- 使用UTF-8编码，支持中文 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>产品防伪追溯平台</title>
+    <!-- 修复Bootstrap资源链接（使用官方CDN） -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script> <!-- 引入jQuery（Bootstrap依赖） -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script> <!-- 修复JS链接 -->
+    <style type="text/css">
+        /* 主界面样式：圆角边框、固定宽高、居中显示 */
+        .main-container {
+            border-radius: 15px;
+            width: 300px;
+            height: 400px;
+            border: 1px solid rgba(0,0,0,.2);
+            margin: 10% auto;
+            padding: 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 增加轻微阴影提升质感 */
+        }
+        /* 标题样式：居中、字体大小 */
+        .title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        /* 图片容器：居中显示 */
+        .logo-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .logo-container img {
+            width: 20%; /* 控制图片大小 */
+            max-width: 60px; /* 限制最大宽度 */
+        }
+        /* 输入框容器：内边距 */
+        .input-container {
+            padding: 0 30px;
+            margin: 15px 0;
+        }
+        /* 输入框样式：圆角、边框 */
+        .form-control {
+            border-radius: 10px;
+            height: 40px;
+            font-size: 14px;
+        }
+        /* 错误提示：红色、隐藏 */
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            display: none;
+            margin-top: 5px;
+        }
+        /* 按钮容器：内边距、按钮样式 */
+        .btn-container {
+            padding: 10px 50px;
+            margin: 10px 0;
+        }
+        .btn-block {
+            border-radius: 20px;
+            height: 40px;
+            font-size: 16px;
+        }
+        /* 模态框样式：圆角、固定高度 */
+        .modal-content {
+            border-radius: 15px;
+            height: auto;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .result-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .success { color: #4CD964; font-weight: bold; } /* 成功绿色 */
+        .error { color: #FF3B30; font-weight: bold; } /* 错误红色 */
+    </style>
+</head>
+<body>
+    <!-- 主界面 -->
+    <div class="main-container">
+        <div class="modal-header" style="border: none; padding: 10px 0;">
+            <h4 class="title" id="myModalLabel">防伪查询</h4>
+        </div>
+        <div class="body">
+            <!-- 315盾牌图标 -->
+            <div class="logo-container">
+                <img src="verify_315.png" alt="315盾牌图标"> <!-- 使用verify_315.png显示 -->
+            </div>
+            <!-- 输入区域 -->
+            <div class="input-container">
+                <label>请输入刮涂层下面的防伪码：</label>
+                <input id="code" type="text" class="form-control" placeholder="请输入20位防伪编码">
+                <span id="erro" class="error-msg">请输入防伪码！</span> <!-- 空值错误提示 -->
+                <span id="lenError" class="error-msg">编码输入不对（需20位编码）</span> <!-- 长度错误提示 -->
+            </div>
+            <!-- 按钮区域 -->
+            <div class="btn-container">
+                <button type="button" id="query" class="btn btn-success btn-block">查 询</button> <!-- 绿色查询按钮 -->
+            </div>
+            <div class="btn-container">
+                <button type="button" id="exit" class="btn btn-default btn-block">退 出</button> <!-- 灰色退出按钮 -->
+            </div>
+        </div>
+        <div class="footer" style="border: none;"></div>
+    </div>
+
+    <!-- 结果模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="border: none; padding: 10px 0;">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="title" id="myModalLabel">防伪查询</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- 模态框内315图标 -->
+                    <div class="logo-container">
+                        <img src="verify_315.png" alt="315盾牌图标">
+                    </div>
+                    <!-- 结果显示区域 -->
+                    <div id="result" class="result-text text-center"></div>
+                </div>
+                <div class="modal-footer" style="border: none; text-align: center;">
+                    <button type="button" class="btn btn-default btn-block" data-dismiss="modal">退 出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+            // 时间格式化函数（将Date转为YYYY-MM-DD HH:MM:SS）
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需+1
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            }
+
+            // 查询按钮点击事件（仅修改时间部分）
+            $("#query").click(function() {
+                const code = $("#code").val().trim(); // 获取输入并去空格
+                const erroMsg = $("#erro");
+                const lenErroMsg = $("#lenError");
+
+                // 重置错误提示
+                erroMsg.hide();
+                lenErroMsg.hide();
+
+                // 验证逻辑：空值检查
+                if (code === "") {
+                    erroMsg.show();
+                    $("#code").focus(); // 聚焦输入框
+                    return;
+                }
+
+                // 验证逻辑：20位编码检查
+                if (code.length !== 20) {
+                    lenErroMsg.show();
+                    $("#code").focus();
+                    return;
+                }
+
+                // 验证通过：动态生成当前时间并替换原固定时间
+                const currentTime = new Date(); // 获取当前时间
+                const formattedTime = formatDate(currentTime); // 格式化时间
+                const resultHtml = `
+                    <div>您输入的数码是：<strong>${code}</strong></div>
+                    <div class="success">查询结果：查询成功！编码格式正确（20位）。</div>
+                    <div class="success">您所查询的号码对应登记的产品是山西卫鹏制药有限公司生产的产品，请放心购买。</div>
+                    <div class="warning">您输入的数码已经被查询过，首次查询时间为：${formattedTime}</div>
+                    <div class="warning">若首次查询非消费者本人所为，提醒您谨防假冒。</div>
+                `;
+                $("#result").html(resultHtml); // 填充结果到模态框
+                $("#myModal").modal("show"); // 显示模态框
+            });
+
+            // 退出按钮点击事件（未修改）
+            $("#exit").click(function() {
+                if (confirm("确定要退出吗？")) {
+                    window.location.href = "about:blank"; // 跳转到空白页（替代window.close()，现代浏览器更安全）
+                }
+            });
+        });
+    </script>
+</body>
+</html>
