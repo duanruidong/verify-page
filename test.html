@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>产品防伪追溯平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            width: 375px; /* 模拟手机屏幕宽度（与图片一致） */
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 1. 主界面（复刻第2张图） */
+        .main-interface {
+            background: white;
+            height: 667px; /* 模拟手机屏幕高度（与图片一致） */
+            padding: 30px 20px;
+            text-align: center;
+            position: relative; /* 作为悬浮浮窗的定位参考 */
+        }
+        .title-bar {
+            margin-bottom: 30px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+        .url {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .shield-icon {
+            width: 80px;
+            height: 90px;
+            background: #FF9500; /* 橙色盾牌（复刻第2张图） */
+            margin: 0 auto 15px;
+            border-radius: 10px 10px 40px 40px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .shield-icon::before {
+            content: "315";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .query-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .query-btn {
+            background: #4CD964; /* 绿色查询按钮（复刻第2张图） */
+            color: white;
+        }
+        .exit-btn {
+            background: #999; /* 灰色退出按钮（复刻第2张图） */
+            color: white;
+        }
+
+        /* 2. 悬浮浮窗（复刻第1张图，覆盖在主界面上） */
+        .floating-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 100; /* 覆盖主界面 */
+            display: none; /* 默认隐藏 */
+            padding: 20px;
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .popup-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+        .popup-close {
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+        }
+        .popup-shield {
+            width: 60px;
+            height: 70px;
+            background: #FF9500; /* 橙色盾牌（复刻第1张图） */
+            margin: 0 auto 15px;
+            border-radius: 8px 8px 30px 30px;
+            position: relative;
+        }
+        .popup-shield::before {
+            content: "315";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .popup-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .popup-code {
+            font-weight: bold;
+            color: #000;
+        }
+        .success {
+            color: #4CD964; /* 成功信息绿色（复刻第1张图） */
+            font-weight: bold;
+        }
+        .error {
+            color: #FF3B30; /* 错误信息红色（复刻第1张图） */
+            font-weight: bold;
+        }
+        .warning {
+            color: #FF9500; /* 警告信息橙色（复刻第1张图） */
+            font-weight: bold;
+        }
+        .popup-exit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #999; /* 灰色退出按钮（复刻第1张图） */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. 主界面（复刻第2张图） -->
+    <div class="main-interface" id="mainInterface">
+        <div class="title-bar">
+            <div class="title">产品防伪追溯平台</div>
+            <div class="url">www.315.org.cn</div>
+        </div>
+        <div class="shield-icon"></div>
+        <div class="query-title">防伪查询</div>
+        <div class="hint">请输入刮涂层下面的防伪码：</div>
+        <input type="text" class="input-box" id="codeInput" placeholder="请输入20位防伪编码">
+        <div class="btn-group">
+            <button class="btn query-btn" onclick="showPopup()">查询</button>
+            <button class="btn exit-btn" onclick="window.close()">退出</button>
+        </div>
+    </div>
+
+    <!-- 2. 悬浮浮窗（复刻第1张图，覆盖在主界面上） -->
+    <div class="floating-popup" id="floatingPopup">
+        <div class="popup-header">
+            <div class="popup-title">防伪查询</div>
+            <div class="popup-close" onclick="hidePopup()">×</div>
+        </div>
+        <div class="popup-shield"></div>
+        <div class="popup-content" id="popupContent">
+            <!-- 结果内容动态填充 -->
+        </div>
+        <button class="popup-exit-btn" onclick="hidePopup()">退出</button>
+    </div>
+
+    <script>
+        // 1. 显示悬浮浮窗（复刻第1张图）
+        function showPopup() {
+            const input = document.getElementById('codeInput').value.trim();
+            const popup = document.getElementById('floatingPopup');
+            const content = document.getElementById('popupContent');
+
+            if (input.length !== 20) {
+                // 非20位：显示错误提示（复刻第1张图的错误风格）
+                content.innerHTML = `
+                    <div>您输入的数码是：<span class="popup-code">${input || '未输入'}</span></div>
+                    <div class="error">查询结果：编码输入不对（需20位编码）</div>
+                    <div>请重新输入正确的20位防伪编码。</div>
+                `;
+            } else {
+                // 20位：显示查询成功（复刻第1张图的成功风格）
+                content.innerHTML = `
+                    <div>您输入的数码是：<span class="popup-code">${input}</span></div>
+                    <div class="success">查询结果：您所查询的号码对应登记的产品是山西卫鹏制药有限公司生产的产品，请放心购买。</div>
+                    <div class="warning">您输入的数码已经被查询过，首次查询时间为：<span class="popup-code">2025-10-24 08:50:52</span></div>
+                    <div class="warning">若首次查询非消费者本人所为，提醒您谨防假冒。</div>
+                `;
+            }
+
+            popup.style.display = 'block'; // 显示悬浮浮窗（覆盖主界面）
+        }
+
+        // 2. 隐藏悬浮浮窗（回到主界面）
+        function hidePopup() {
+            document.getElementById('floatingPopup').style.display = 'none';
+            document.getElementById('codeInput').value = ''; // 清空输入框
+        }
+    </script>
+</body>
+</html>
